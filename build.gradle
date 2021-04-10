@@ -1,0 +1,49 @@
+plugins {
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.30'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30'
+}
+
+apply from: 'gradle/setup.gradle.kts'
+
+allprojects {
+    group 'io.github.kasukusakura'
+    version '1.0-SNAPSHOT'
+    apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        api("org.jetbrains.kotlin:kotlin-stdlib")
+        api("org.jetbrains.kotlin:kotlin-reflect")
+    }
+
+
+    def versionOverrides = [
+            '=====================================': '',
+            'io.netty'                             : '4.1.59.Final',
+            'org.jetbrains.kotlin'                 : '1.4.30',
+            'io.ktor'                              : '1.5.1',
+            'org.jetbrains:annotations'            : '20.1.0',
+            'io.github.karlatemp.mxlib'            : '3.0-dev-15',
+    ]
+    configurations.all { Configuration configuration ->
+        configuration.resolutionStrategy.eachDependency { dependency ->
+            def result1 = versionOverrides[dependency.requested.module.toString()]
+            if (result1 != null) {
+                dependency.useVersion(result1)
+                dependency.because("Custom override rule")
+            } else {
+                def result2 = versionOverrides[dependency.requested.group]
+                if (result2 != null) {
+                    dependency.useVersion(result2)
+                    dependency.because("Custom override rule")
+                }
+            }
+        }
+    }
+
+}
